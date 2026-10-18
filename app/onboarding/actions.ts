@@ -23,3 +23,16 @@ export async function joinSchool(_: any, form: FormData) {
   if (error) return { error: error.message };
   redirect(role === "parent" ? "/this-week" : "/scheme");
 }
+
+export async function joinAsStudent(_: any, form: FormData) {
+  const supabase = await createClient();
+  const dob = String(form.get("dob") || "");
+  const { error } = await supabase.rpc("join_as_student", {
+    p_code: String(form.get("code") || ""),
+    p_admission_no: String(form.get("admission_no") || ""),
+    p_full_name: String(form.get("full_name") || ""),
+    p_dob: dob || null,
+  });
+  if (error) return { error: error.message };
+  redirect("/my");
+}

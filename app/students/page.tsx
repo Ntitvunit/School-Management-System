@@ -7,8 +7,8 @@ type Search = { arm?: string; q?: string; status?: string };
 
 export default async function StudentsPage({ searchParams }: { searchParams: Promise<Search> }) {
   const sp = await searchParams;
-  const { supabase, profile, school } = await requireMember(["admin", "teacher"]);
-  const arms = await loadArms(supabase, school.id);
+  const { supabase, profile, school } = await requireMember(["admin", "teacher", "bursar"]);
+  const arms = await loadArms(supabase, school.id, school);
   const status = sp.status || "active";
 
   let q = supabase.from("students")

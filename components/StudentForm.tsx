@@ -42,6 +42,11 @@ export default function StudentForm({ action, arms, student, submitLabel }: {
         <label className="field" htmlFor="st-dob">Date of birth
           <input id="st-dob" type="date" name="date_of_birth" defaultValue={s.date_of_birth || ""} />
         </label>
+        <label className="field" htmlFor="st-stream">Stream (SSS only)
+          <select id="st-stream" name="stream" defaultValue={s.stream || ""}>
+            <option value="">—</option><option>Science</option><option>Arts</option><option>Commercial</option><option>Technical</option>
+          </select>
+        </label>
         <label className="field" htmlFor="st-status">Status
           <select id="st-status" name="status" defaultValue={s.status || "active"}>
             <option value="active">Active</option><option value="graduated">Graduated</option><option value="withdrawn">Withdrawn</option>

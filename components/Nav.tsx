@@ -1,11 +1,22 @@
 import Link from "next/link";
 import { getContext } from "@/lib/context";
 
+const LINKS: Record<string, [string, string][]> = {
+  admin: [["/", "Home"], ["/students", "Students"], ["/results", "Results"], ["/attendance", "Attendance"], ["/scheme", "Scheme of work"],
+          ["/notes", "Lesson notes"], ["/finance", "Finance"], ["/announcements", "News"], ["/settings", "Settings"]],
+  teacher: [["/", "Home"], ["/students", "Students"], ["/results", "Results"], ["/attendance", "Attendance"], ["/scheme", "Scheme of work"],
+            ["/notes", "Lesson notes"], ["/announcements", "News"]],
+  bursar: [["/", "Home"], ["/finance", "Finance"], ["/finance/pay", "Record payment"], ["/students", "Students"], ["/announcements", "News"]],
+  parent: [["/", "Home"], ["/children", "My children"], ["/this-week", "This week"], ["/announcements", "News"]],
+  student: [["/my", "My results"], ["/this-week", "This week"], ["/announcements", "News"]],
+};
+
 export default async function Nav() {
   const { user, profile, school, isPlatformAdmin } = await getContext();
   if (!user) return null;
   const role = profile?.role;
   const active = school && school.status === "active";
+  const links = active && role ? LINKS[role] || [] : [];
   return (
     <header className="topbar">
       <div className="topbar-inner">
@@ -14,14 +25,7 @@ export default async function Nav() {
           <small>{school?.motto || "School Management System"}</small>
         </Link>
         <nav className="nav" aria-label="Main">
-          {active && <Link href="/">Home</Link>}
-          {active && role !== "parent" && <Link href="/scheme">Scheme of work</Link>}
-          {active && role !== "parent" && <Link href="/notes">Lesson notes</Link>}
-          {active && role !== "parent" && <Link href="/students">Students</Link>}
-          {active && role === "parent" && <Link href="/children">My children</Link>}
-          {active && role === "admin" && <Link href="/coverage">Coverage</Link>}
-          {active && <Link href="/this-week">This week</Link>}
-          {active && role === "admin" && <Link href="/settings">Settings</Link>}
+          {links.map(([href, label]) => <Link key={href} href={href}>{label}</Link>)}
           {isPlatformAdmin && <Link href="/platform" className="platform-link">Platform owner</Link>}
         </nav>
         <div className="who">

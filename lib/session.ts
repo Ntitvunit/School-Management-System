@@ -5,7 +5,7 @@ export type Profile = {
   id: string;
   school_id: string | null;
   full_name: string | null;
-  role: "admin" | "teacher" | "parent";
+  role: "admin" | "teacher" | "bursar" | "parent" | "student";
 };
 
 export type School = {
@@ -20,6 +20,13 @@ export type School = {
   brand_accent: string | null;
   motto: string | null;
   status: "active" | "suspended";
+  levels?: string[];
+  assessment?: any;
+  grading?: any;
+  block_results_if_owing?: boolean;
+  next_term_begins?: string | null;
+  address?: string | null;
+  phone?: string | null;
 };
 
 /** Signed-in user with an active school. Sends people to login, onboarding or the suspended notice when needed. */
@@ -32,4 +39,4 @@ export async function requireMember(allowed?: Profile["role"][]) {
   return { supabase, user, profile: profile as Profile, school: school as School, isPlatformAdmin };
 }
 
-export const TERM_NAMES = ["", "First", "Second", "Third"];
+export { TERM_NAMES } from "@/lib/terms";

@@ -1,15 +1,14 @@
 import Link from "next/link";
 import { requireMember, TERM_NAMES } from "@/lib/session";
 import AutoSelect from "@/components/AutoSelect";
+import { loadArms } from "@/lib/arms";
 
 type Search = { arm?: string; term?: string };
 
 export default async function CoveragePage({ searchParams }: { searchParams: Promise<Search> }) {
   const sp = await searchParams;
   const { supabase, school } = await requireMember(["admin"]);
-  const { data: armsRaw } = await supabase.from("class_arms")
-    .select("id, arm, class_code, class_levels(name, sort_order)").eq("school_id", school.id);
-  const arms = (armsRaw || []).sort((a: any, b: any) => a.class_levels.sort_order - b.class_levels.sort_order || a.arm.localeCompare(b.arm));
+  const arms = await loadArms(supabase, school.id, school);
   const term = Number(sp.term) || school.current_term;
   const arm: any = arms.find((a: any) => a.id === sp.arm) || arms[0];
   if (!arm) return <main className="page"><div className="card">No classes set up yet.</div></main>;

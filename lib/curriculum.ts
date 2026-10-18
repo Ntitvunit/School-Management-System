@@ -1,4 +1,4 @@
-import { TERM_NAMES } from "@/lib/session";
+import { TERM_NAMES } from "@/lib/terms";
 
 export type Topic = {
   id: string; class_code: string; subject_id: string; term: number; week: string; week_start: number;

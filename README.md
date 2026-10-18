@@ -1,39 +1,35 @@
-# School Management System (prototype)
+# School Management System
 
-Scheme of work, lesson notes and curriculum coverage for Nigerian schools (Pre-Nursery to Primary 6; JSS and SSS to follow).
-Built with Next.js and Supabase.
+A school management system for Nigerian schools, customisable for Basic (Nursery, Primary, JSS) and Post-Basic (SSS).
+Built with Next.js and Supabase; deployed on Vercel.
 
-## What's in this version
-- **Sign in / create account**, then **create a school** (you become admin) or **join a school** with its 6-character code (teachers and parents).
-- **Scheme of work** (teachers, admin): class → subject → term, week by week from the 2025 scheme. Mark topics as covered. Virtual lab links on science topics.
-- **Lesson notes**: one click creates a note pre-filled from the week's topic, objectives, activities and materials. Teachers save drafts and submit; the admin approves or returns with a comment.
-- **Coverage** (admin): topics covered per subject against what is expected by the current week.
-- **This week** (everyone, especially parents): what each class is learning this week.
-- **School settings** (admin): school code, motto, session, current term and week, **theme and colours** (6 presets or custom school colours), class arms, list of people.
-- **Home dashboard**: summary numbers and colourful shortcuts for each role.
-- **Students** (admin adds/edits, teachers view): admission number, class, gender, date of birth, guardian details, medical notes, status. Admin links parent accounts to children.
-- **My children** (parents): only the children linked to their account.
-- **Platform owner** (developer only): every school with counts of teachers, parents, students and lesson notes; suspend or reactivate a school.
+## Modules
+- **School setup**: levels offered, session/term/week, next term date, theme and colours, motto, address,
+  assessment columns (CA/exam weights), grading scale (e.g. A–F or WAEC A1–F9), subjects per class (switch off / add your own),
+  class arms, option to hold results until fees are paid.
+- **Staff and roles**: admin, teacher, bursar; class teachers; subject teachers.
+- **Students**: admission, guardian details, medical notes, stream, status; parent account links; fees and results on each profile.
+- **Academics and results**: score entry with live totals and grades, broadsheet with averages and positions, comments and
+  affective/psychomotor ratings, printable report cards, publish/unpublish per class, **score change log**.
+- **Attendance**: daily register per class; term totals flow into report cards.
+- **Finance (bursary)**: fee structure per class and term, payments with receipts, discounts, debtors list, collection progress.
+- **Curriculum**: scheme of work (Pre-Nursery to Primary 6), lesson notes with review, coverage report, virtual lab links.
+- **Parent portal**: each child's results, attendance, fees and payments, this week's topics, announcements, alert when average drops.
+- **Student portal**: students join with admission number (and date of birth) and see their own results and attendance.
+- **Scratch-card PINs**: public `/check-result` page; each PIN works for one student, up to 5 times, only after results are published.
+- **Announcements** to everyone, staff, parents or students.
+- **Platform owner** area: all schools with counts; suspend or reactivate a school.
 
-## Database setup (Supabase SQL Editor, in order)
-1. `supabase/curriculum/01_schema.sql` … `06_data_part_5.sql` — curriculum tables and data (already done if the count of `curriculum_topics` is 3856).
-2. `supabase/app_setup.sql` — schools, profiles, class arms and security rules. Run once.
-3. `supabase/upgrade_02_students_themes_platform.sql` — themes, students, parent links, platform owner. Run once.
-4. Make yourself platform owner (after signing up in the app), in the SQL Editor:
-   `insert into platform_admins (user_id) select id from auth.users where email = 'YOUR-LOGIN-EMAIL' on conflict do nothing;`
+## Database setup (Supabase SQL Editor, in order, each once)
+1. `supabase/curriculum/01_schema.sql` … `06_data_part_5.sql`
+2. `supabase/app_setup.sql`
+3. `supabase/upgrade_02_students_themes_platform.sql`
+4. `supabase/upgrade_03_full_programme.sql`
+5. Platform owner: `insert into platform_admins (user_id) select id from auth.users where email = 'YOUR-LOGIN-EMAIL' on conflict do nothing;`
 
-## Deploy on Vercel
-1. Sign in at vercel.com with GitHub → **Add New → Project** → import this repository.
-2. Under **Environment Variables** add:
-   - `NEXT_PUBLIC_SUPABASE_URL` — from Supabase → Connect
-   - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (or `NEXT_PUBLIC_SUPABASE_ANON_KEY`) — the publishable / anon key (never the secret or service_role key)
-3. Click **Deploy**.
-4. In Supabase → Authentication → URL Configuration, set **Site URL** to your Vercel address
-   (or, for the prototype, turn off **Confirm email** under Authentication → Providers → Email).
+## Deploy
+Vercel builds automatically from GitHub. The Supabase URL and publishable key are public values and are set in
+`lib/supabase/env.ts` (Vercel environment variables override them).
 
-## Run locally (optional)
-```
-cp .env.example .env.local   # fill in the two values
-npm install
-npm run dev
-```
+## Planned
+Online fee payment (Paystack/Flutterwave), SMS/WhatsApp alerts, CBT, timetable, offline score entry, JSS–SSS scheme of work.

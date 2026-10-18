@@ -112,3 +112,23 @@ input[type=color]{width:56px;height:38px;padding:2px;cursor:pointer}
 .kv dd{margin:0}
 @media (max-width:560px){.kv{grid-template-columns:minmax(0,1fr)}}
 .grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:12px}
+
+/* Report card, PINs, printing */
+.report{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:20px;display:grid;gap:16px;border-top:6px solid var(--board)}
+.report-head{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;border-bottom:2px solid var(--mark);padding-bottom:12px}
+.report-head h1{color:var(--board)}
+.report-title{font-family:var(--display);font-weight:700;font-size:20px;text-align:right}
+.report-title span{font-family:var(--body);font-weight:400;font-size:14px;color:var(--muted)}
+.report-table th,.report-table td{text-align:center}
+.report-table th:first-child,.report-table td:first-child{text-align:left}
+.pin-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,260px),1fr));gap:10px}
+.pin-slip{border:1.5px dashed var(--line);border-radius:10px;padding:12px;background:var(--surface);display:grid;gap:4px}
+.pin{font-family:ui-monospace,Menlo,monospace;font-size:20px;font-weight:700;letter-spacing:.08em;color:var(--board)}
+.scores input{padding:6px}
+@media print{
+  .topbar,.no-print,nav.nav{display:none!important}
+  body{background:#fff;color:#000}
+  .page{padding:0;max-width:none}
+  .report,.card{border-color:#999;box-shadow:none}
+  .pin-slip{break-inside:avoid}
+}

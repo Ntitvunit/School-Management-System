@@ -6,7 +6,7 @@ import { createStudent } from "../actions";
 
 export default async function NewStudent() {
   const { supabase, school } = await requireMember(["admin"]);
-  const arms = await loadArms(supabase, school.id);
+  const arms = await loadArms(supabase, school.id, school);
   return (
     <main className="page" style={{ maxWidth: 900 }}>
       <div>

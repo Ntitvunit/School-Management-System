@@ -1,10 +1,12 @@
 import { requireMember, TERM_NAMES } from "@/lib/session";
 import AutoSelect from "@/components/AutoSelect";
+import { schoolLevels } from "@/lib/levels";
 
 export default async function ThisWeek({ searchParams }: { searchParams: Promise<{ class?: string }> }) {
   const sp = await searchParams;
   const { supabase, school } = await requireMember();
-  const { data: classes } = await supabase.from("class_levels").select("code, name, sort_order").order("sort_order");
+  const { data: allClasses } = await supabase.from("class_levels").select("code, name, sort_order, level").order("sort_order");
+  const classes = (allClasses || []).filter((c: any) => schoolLevels(school).includes(c.level));
   const cls = (classes || []).find((c: any) => c.code === sp.class) || (classes || []).find((c: any) => c.code === "P4") || classes?.[0];
   const { data: topics } = await supabase.from("curriculum_topics")
     .select("id, topic, subtopics, week_type, subjects(name)")

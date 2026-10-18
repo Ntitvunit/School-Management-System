@@ -22,6 +22,7 @@ function fields(form: FormData) {
     address: v("address"),
     medical_notes: v("medical_notes"),
     status: v("status") || "active",
+    stream: v("stream"),
   };
 }
 

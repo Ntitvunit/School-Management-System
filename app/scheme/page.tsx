@@ -2,6 +2,7 @@ import Link from "next/link";
 import { requireMember, TERM_NAMES } from "@/lib/session";
 import { SCIENCE_SUBJECTS, WEEK_LABEL, type Topic } from "@/lib/curriculum";
 import AutoSelect from "@/components/AutoSelect";
+import { loadArms } from "@/lib/arms";
 import { startLessonNote, toggleCoverage } from "./actions";
 
 type Search = { arm?: string; subject?: string; term?: string; week?: string };
@@ -10,11 +11,7 @@ export default async function SchemePage({ searchParams }: { searchParams: Promi
   const sp = await searchParams;
   const { supabase, profile, school } = await requireMember(["admin", "teacher"]);
 
-  const { data: armsRaw } = await supabase
-    .from("class_arms")
-    .select("id, arm, class_code, class_levels(name, sort_order)")
-    .eq("school_id", school.id);
-  const arms = (armsRaw || []).sort((a: any, b: any) => a.class_levels.sort_order - b.class_levels.sort_order || a.arm.localeCompare(b.arm));
+  const arms = await loadArms(supabase, school.id, school);
   if (!arms.length) return <main className="page"><div className="card">No classes set up yet. Ask your admin.</div></main>;
 
   const arm: any = arms.find((a: any) => a.id === sp.arm) || arms.find((a: any) => a.class_code === "P4") || arms[0];

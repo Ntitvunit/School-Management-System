@@ -4,6 +4,9 @@ import { requireMember } from "@/lib/session";
 import { loadArms } from "@/lib/arms";
 import StudentForm from "@/components/StudentForm";
 import { linkParent, unlinkParent, updateStudent } from "../actions";
+import { addDiscount } from "@/app/finance/actions";
+import { naira } from "@/lib/money";
+import { TERM_NAMES } from "@/lib/terms";
 
 function age(dob?: string | null) {
   if (!dob) return null;
@@ -19,10 +22,13 @@ export default async function StudentPage({ params, searchParams }: { params: Pr
   const { supabase, profile, school } = await requireMember();
   const { data: s } = await supabase.from("students").select("*").eq("id", id).maybeSingle();
   if (!s) notFound();
-  const arms = await loadArms(supabase, school.id);
+  const arms = await loadArms(supabase, school.id, school);
   const arm = arms.find((a: any) => a.id === s.class_arm_id);
   const isAdmin = profile.role === "admin";
-  const isParent = profile.role === "parent";
+  const isParent = profile.role === "parent" || profile.role === "student";
+  const isFinance = profile.role === "admin" || profile.role === "bursar";
+  const isStaff = ["admin", "teacher", "bursar"].includes(profile.role);
+  const { data: overview } = await supabase.rpc("get_child_overview", { p_student: id });
 
   const { data: links } = await supabase.from("student_guardians").select("parent_id, relationship").eq("student_id", id);
   const { data: parents } = isAdmin
@@ -51,7 +57,7 @@ export default async function StudentPage({ params, searchParams }: { params: Pr
           </div>
         </div>
       </div>
-      {sp.saved && <div className="notice">{sp.saved === "new" ? "Student admitted." : sp.saved === "link" ? "Parent account linked." : "Saved."}</div>}
+      {sp.saved && <div className="notice">{sp.saved === "new" ? "Student admitted." : sp.saved === "link" ? "Parent account linked." : sp.saved === "discount" ? "Discount recorded." : "Saved."}</div>}
 
       {isAdmin && sp.edit ? (
         <StudentForm action={updateStudent} arms={arms.map((a: any) => ({ id: a.id, label: a.label }))} student={s} submitLabel="Save changes" />
@@ -120,10 +126,47 @@ export default async function StudentPage({ params, searchParams }: { params: Pr
         </section>
       )}
 
-      <section className="card">
-        <h2>Results, attendance and fees</h2>
-        <p className="muted small">Coming in the next update: term results and report cards, daily attendance, and fee payments for this student.</p>
-      </section>
+      {overview && (
+        <section className="grid2">
+          <div className="card">
+            <h2>Results and attendance</h2>
+            <p className="small">Attendance this term: <b>{overview.attendance?.total ? `${overview.attendance.present} of ${overview.attendance.total} days` : "not recorded"}</b></p>
+            {(overview.results || []).length === 0 ? <p className="muted small">No scores entered yet.</p> : (
+              <table className="list"><tbody>
+                {(overview.results || []).slice().reverse().map((r: any) => (
+                  <tr key={r.session + r.term}>
+                    <td>{TERM_NAMES[r.term]} term {r.session}</td>
+                    <td>{r.average !== null && r.average !== undefined ? `Average ${Number(r.average).toFixed(1)}` : r.published ? "" : "Not released"}</td>
+                    <td><a href={`/results/report/${id}?term=${r.term}&session=${encodeURIComponent(r.session)}`}>Report card</a></td>
+                  </tr>
+                ))}
+              </tbody></table>
+            )}
+          </div>
+          {(isFinance || isParent) && (
+            <div className="card">
+              <h2>Fees · {TERM_NAMES[overview.term]} term</h2>
+              <dl className="kv">
+                <dt>Billed</dt><dd>{naira(overview.fees?.billed)}</dd>
+                <dt>Discount</dt><dd>{naira(overview.fees?.discount)}</dd>
+                <dt>Paid</dt><dd>{naira(overview.fees?.paid)}</dd>
+                <dt>Balance</dt><dd><b className={overview.fees?.balance > 0 ? "behind" : ""}>{naira(overview.fees?.balance)}</b></dd>
+              </dl>
+              {isFinance && (
+                <>
+                  <a className="btn small" href={`/finance/pay?student=${id}`}>Record a payment</a>
+                  <form action={addDiscount} className="row">
+                    <input type="hidden" name="student_id" value={id} />
+                    <label className="field" htmlFor="d-amt">Discount (₦)<input id="d-amt" name="amount" inputMode="decimal" style={{ width: 110 }} /></label>
+                    <label className="field" htmlFor="d-reason">Reason<input id="d-reason" name="reason" placeholder="e.g. Sibling discount" /></label>
+                    <button className="btn ghost small">Add discount</button>
+                  </form>
+                </>
+              )}
+            </div>
+          )}
+        </section>
+      )}
     </main>
   );
 }
