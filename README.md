@@ -19,7 +19,7 @@ Built with Next.js and Supabase.
 1. Sign in at vercel.com with GitHub → **Add New → Project** → import this repository.
 2. Under **Environment Variables** add:
    - `NEXT_PUBLIC_SUPABASE_URL` — from Supabase → Connect
-   - `NEXT_PUBLIC_SUPABASE_ANON_KEY` — the anon / public key (never the service_role key)
+   - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (or `NEXT_PUBLIC_SUPABASE_ANON_KEY`) — the publishable / anon key (never the secret or service_role key)
 3. Click **Deploy**.
 4. In Supabase → Authentication → URL Configuration, set **Site URL** to your Vercel address
    (or, for the prototype, turn off **Confirm email** under Authentication → Providers → Email).
