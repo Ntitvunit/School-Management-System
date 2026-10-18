@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { getContext } from "@/lib/context";
 
 export type Profile = {
   id: string;
@@ -15,18 +15,21 @@ export type School = {
   current_session: string;
   current_term: number;
   current_week: number;
+  theme: string;
+  brand_primary: string | null;
+  brand_accent: string | null;
+  motto: string | null;
+  status: "active" | "suspended";
 };
 
-/** Signed-in user with a school. Sends people to login or onboarding when needed. */
+/** Signed-in user with an active school. Sends people to login, onboarding or the suspended notice when needed. */
 export async function requireMember(allowed?: Profile["role"][]) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const { supabase, user, profile, school, isPlatformAdmin } = await getContext();
   if (!user) redirect("/login");
-  const { data: profile } = await supabase.from("profiles").select("*").eq("id", user.id).maybeSingle();
   if (!profile || !profile.school_id) redirect("/onboarding");
+  if (school?.status === "suspended") redirect("/suspended");
   if (allowed && !allowed.includes(profile.role)) redirect("/");
-  const { data: school } = await supabase.from("schools").select("*").eq("id", profile.school_id).single();
-  return { supabase, user, profile: profile as Profile, school: school as School };
+  return { supabase, user, profile: profile as Profile, school: school as School, isPlatformAdmin };
 }
 
 export const TERM_NAMES = ["", "First", "Second", "Third"];

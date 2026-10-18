@@ -2,11 +2,13 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireMember } from "@/lib/session";
+import { THEMES, isHex } from "@/lib/theme";
 
 export async function updateSchool(form: FormData) {
   const { supabase, school } = await requireMember(["admin"]);
   const { error } = await supabase.from("schools").update({
     name: String(form.get("name") || school.name).trim(),
+    motto: String(form.get("motto") || "").trim() || null,
     current_session: String(form.get("session") || school.current_session).trim(),
     current_term: Number(form.get("term")) || school.current_term,
     current_week: Number(form.get("week")) || school.current_week,
@@ -14,6 +16,22 @@ export async function updateSchool(form: FormData) {
   if (error) throw new Error(error.message);
   revalidatePath("/", "layout");
   redirect("/settings?saved=1");
+}
+
+export async function updateTheme(form: FormData) {
+  const { supabase, school } = await requireMember(["admin"]);
+  const theme = String(form.get("theme") || "chalkboard");
+  const valid = theme === "custom" || THEMES.some((t) => t.id === theme);
+  const primary = String(form.get("brand_primary") || "");
+  const accent = String(form.get("brand_accent") || "");
+  const { error } = await supabase.from("schools").update({
+    theme: valid ? theme : "chalkboard",
+    brand_primary: isHex(primary) ? primary : null,
+    brand_accent: isHex(accent) ? accent : null,
+  }).eq("id", school.id);
+  if (error) throw new Error(error.message);
+  revalidatePath("/", "layout");
+  redirect("/settings?saved=theme#theme");
 }
 
 export async function addArm(form: FormData) {

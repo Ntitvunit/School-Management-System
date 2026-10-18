@@ -9,11 +9,18 @@ Built with Next.js and Supabase.
 - **Lesson notes**: one click creates a note pre-filled from the week's topic, objectives, activities and materials. Teachers save drafts and submit; the admin approves or returns with a comment.
 - **Coverage** (admin): topics covered per subject against what is expected by the current week.
 - **This week** (everyone, especially parents): what each class is learning this week.
-- **School settings** (admin): school code, session, current term and week, class arms, list of people.
+- **School settings** (admin): school code, motto, session, current term and week, **theme and colours** (6 presets or custom school colours), class arms, list of people.
+- **Home dashboard**: summary numbers and colourful shortcuts for each role.
+- **Students** (admin adds/edits, teachers view): admission number, class, gender, date of birth, guardian details, medical notes, status. Admin links parent accounts to children.
+- **My children** (parents): only the children linked to their account.
+- **Platform owner** (developer only): every school with counts of teachers, parents, students and lesson notes; suspend or reactivate a school.
 
 ## Database setup (Supabase SQL Editor, in order)
 1. `supabase/curriculum/01_schema.sql` … `06_data_part_5.sql` — curriculum tables and data (already done if the count of `curriculum_topics` is 3856).
 2. `supabase/app_setup.sql` — schools, profiles, class arms and security rules. Run once.
+3. `supabase/upgrade_02_students_themes_platform.sql` — themes, students, parent links, platform owner. Run once.
+4. Make yourself platform owner (after signing up in the app), in the SQL Editor:
+   `insert into platform_admins (user_id) select id from auth.users where email = 'YOUR-LOGIN-EMAIL' on conflict do nothing;`
 
 ## Deploy on Vercel
 1. Sign in at vercel.com with GitHub → **Add New → Project** → import this repository.
